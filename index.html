@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<title>KRIAA — Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <button class="mobile-menu" onclick="toggleMobileMenu()">☰</button>
+  <a class="logo" href="#" onclick="show('home');return false;">KRIAA</a>
+  <nav id="mainNav">
+    <button onclick="show('home')">الرئيسية</button>
+    <button onclick="show('shop')">المتجر</button>
+    <button onclick="show('portfolio')">Portfolio</button>
+    <button id="loginButton" onclick="openLogin()">تسجيل الدخول</button>
+    <button id="adminButton" class="admin-nav-button" onclick="openAdminDashboard()" style="display:none">Admin</button>
+    <button id="logoutButton" class="logout-button" onclick="logout()" style="display:none">تسجيل الخروج</button>
+  </nav>
+</header>
+
+<main>
+<section id="home" class="page active">
+  <div class="hero">
+    <div class="hero-content">
+      <span class="eyebrow">KRIAA</span>
+      <h1 id="heroStoreName">ملابس بتفاصيل مختلفة</h1>
+      <p>اكتشف قطع KRIAA بتصاميم بسيطة، فخمة ومميزة.</p>
+      <button class="primary-btn" onclick="show('shop')">اكتشف المتجر</button>
+    </div>
+  </div>
+</section>
+
+<section id="shop" class="page">
+  <div class="section-heading"><span class="eyebrow">KRIAA CLOTHES</span><h2>المتجر</h2><p>اختر القطعة والمقاس واللون المناسب.</p></div>
+  <div class="categories" aria-label="Catégories">
+    <button class="category-btn active" data-category="all" onclick="setCategory('all')">TOUT</button>
+    <button class="category-btn" data-category="tshirts" onclick="setCategory('tshirts')">T-SHIRTS</button>
+    <button class="category-btn" data-category="sweatshirts" onclick="setCategory('sweatshirts')">SWEATSHIRTS</button>
+    <button class="category-btn" data-category="hoodies" onclick="setCategory('hoodies')">HOODIES</button>
+    <button class="category-btn" data-category="autres" onclick="setCategory('autres')">AUTRES</button>
+  </div>
+  <div class="tools-row"><div class="search-wrap"><span class="search-icon" aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="Rechercher un produit..." oninput="renderProducts()" aria-label="Rechercher un produit"></div></div>
+  <div id="productsContainer" class="products-grid"><p>جاري تحميل المنتجات...</p></div>
+</section>
+
+<section id="services" class="brand-sections">
+  <div class="section-heading compact-heading"><span class="eyebrow">KRIAA SERVICES</span><h2>Services KRIAA</h2><p>Une sélection pensée pour vous.</p></div>
+  <div class="service-grid">
+    <article class="service-card reveal"><span>01</span><h3>Une sélection soignée</h3><p>Des pièces choisies avec attention et une identité simple.</p></article>
+    <article class="service-card reveal"><span>02</span><h3>Des détails différents</h3><p>Une approche minimaliste où chaque détail compte.</p></article>
+    <article class="service-card reveal"><span>03</span><h3>Collection 2026</h3><p>Découvrez les nouveautés KRIAA au fil des collections.</p></article>
+  </div>
+</section>
+
+<section id="about" class="brand-sections split-section">
+  <div class="section-heading compact-heading"><span class="eyebrow">À PROPOS</span><h2>À propos de KRIAA</h2></div>
+  <div class="about-copy reveal"><p>KRIAA construit une identité autour de lignes simples, de tons naturels et de détails différents.</p><div class="about-points"><span>Minimal</span><span>Élégant</span><span>Différent</span></div></div>
+</section>
+
+<section id="why" class="brand-sections why-section">
+  <div class="section-heading compact-heading"><span class="eyebrow">KRIAA</span><h2>Pourquoi KRIAA</h2><p>Une expérience pensée pour rester simple, claire et élégante.</p></div>
+</section>
+
+<section id="contact" class="brand-sections contact-section">
+  <div class="section-heading compact-heading"><span class="eyebrow">CONTACT</span><h2>Contact</h2><p>Pour toute demande, utilisez les moyens de contact officiels affichés par KRIAA.</p></div>
+</section>
+
+<section id="portfolio" class="page">
+  <div class="section-heading"><span class="eyebrow">KRIAA</span><h2>PORTFOLIO</h2><p>أعمال وتصاميم KRIAA.</p></div>
+  <div id="portfolioContainer" class="portfolio-grid"><p>جاري التحميل...</p></div>
+</section>
+
+<section id="admin" class="page">
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="admin-brand"><span>KRIAA</span><small>ADMIN PANEL</small></div>
+      <button class="admin-tab active" data-tab="dashboard" onclick="switchAdminTab('dashboard')">📊 Dashboard</button>
+      <button class="admin-tab" data-tab="products" onclick="switchAdminTab('products')">🛍️ CLOTHES</button>
+      <button class="admin-tab" data-tab="orders" onclick="switchAdminTab('orders')">📦 ORDERS</button>
+      <button class="admin-tab" data-tab="portfolioAdmin" onclick="switchAdminTab('portfolioAdmin')">🖼️ PORTFOLIO</button>
+      <button class="admin-tab" data-tab="settings" onclick="switchAdminTab('settings')">⚙️ SETTINGS</button>
+      <button class="admin-back" onclick="show('shop')">← العودة للمتجر</button>
+    </aside>
+    <div class="admin-main">
+      <div class="admin-topbar"><div><span class="eyebrow">KRIAA ADMIN</span><h2 id="adminTitle">Dashboard</h2></div><button onclick="logout()">تسجيل الخروج</button></div>
+      <div id="adminContent"><div class="loading-box">جاري تحميل لوحة الإدارة...</div></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="site-footer" id="siteFooter">
+  <div class="footer-main">
+    <div class="footer-brand"><span>KRIAA</span><p>Des détails différents.</p></div>
+    <nav class="footer-links" aria-label="Footer">
+      <a href="#shop" onclick="show('shop');return false;">SHOP</a>
+      <a href="#shop" onclick="show('shop');return false;">COLLECTION</a>
+      <a href="#services" onclick="show('shop');setTimeout(()=>document.getElementById('services')?.scrollIntoView({behavior:'smooth'}),40);return false;">SERVICES</a>
+      <a href="#contact" onclick="show('shop');setTimeout(()=>document.getElementById('contact')?.scrollIntoView({behavior:'smooth'}),40);return false;">CONTACT</a>
+    </nav>
+  </div>
+  <div class="footer-bottom"><span>© 2026 KRIAA. Tous droits réservés.</span><span>Luxury minimal.</span></div>
+</footer>
+
+<div id="loginModal" class="modal">
+  <div class="modal-box">
+    <button class="close-modal" onclick="closeLogin()">×</button>
+    <span class="eyebrow">KRIAA</span><h2>تسجيل الدخول</h2>
+    <input id="loginEmail" type="email" placeholder="البريد الإلكتروني">
+    <input id="loginPassword" type="password" placeholder="كلمة المرور">
+    <button class="primary-btn full" onclick="login()">دخول</button>
+    <button class="secondary-btn full" onclick="openSignup()">إنشاء حساب جديد</button>
+    <p id="loginMessage"></p>
+  </div>
+</div>
+
+<div id="orderModal" class="modal">
+  <div class="modal-box"><button class="close-modal" onclick="closeOrder()">×</button><span class="eyebrow">KRIAA ORDER</span><h2 id="orderTitle">طلب القطعة</h2><p id="orderSummary"></p>
+    <input id="orderUsername" placeholder="اسم العميل">
+    <select id="orderSize"><option value="">اختر المقاس</option></select>
+    <select id="orderColor"><option value="">اختر اللون</option></select>
+    <input id="orderQuantity" type="number" min="1" value="1" placeholder="الكمية">
+    <input id="orderWhatsApp" type="tel" placeholder="216XXXXXXXX">
+    <select id="orderGovernorate"><option value="">اختر الولاية</option></select>
+    <select id="orderCity"><option value="">اختر المدينة</option></select>
+    <button class="primary-btn full" onclick="submitOrder()">تأكيد الطلب</button><p id="orderMessage"></p>
+  </div>
+</div>
+
+<div id="editorModal" class="modal"><div class="modal-box large-modal"><button class="close-modal" onclick="closeEditor()">×</button><div id="editorContent"></div></div></div>
+
+<script src="script.js"></script>
+</body>
+</html>
