@@ -284,15 +284,15 @@ function renderProducts(){
   const list = products.filter(p => (currentCategory === "all" || p.category === currentCategory) &&
     (!q || (p.name||"").toLowerCase().includes(q) || (p.description||"").toLowerCase().includes(q)));
   if (!list.length) { el.innerHTML = "<p>لا توجد منتجات حاليًا.</p>"; return; }
-  el.innerHTML = list.map(p => `<article class="product-card">
-    <img class="product-image" style="cursor:pointer" onclick="openProduct('${p.id}')" src="${esc(p.image_url || "https://placehold.co/700x700?text=KRIAA")}" alt="${esc(p.name)}">
-    <div class="product-info">${p.badge ? `<span class="badge">${esc(p.badge)}</span>` : ""}
-      <h3 style="cursor:pointer" onclick="openProduct('${p.id}')">${esc(p.name)}</h3>
+  el.innerHTML = list.map(p => `<article class="product-card kx-rv" onclick="openProduct('${p.id}')">
+    <div class="pc-media">${p.badge ? `<span class="badge pc-badge">${esc(p.badge)}</span>` : ""}${p.featured ? '<span class="pc-feat">★</span>' : ""}<img class="product-image" loading="lazy" decoding="async" src="${esc(p.image_url || "https://placehold.co/700x700?text=KRIAA")}" alt="${esc(p.name)}"></div>
+    <div class="product-info">
+      <h3>${esc(p.name)}</h3>
       <p>${esc(p.description || "")}</p>
       <div class="price">${money(p.price)} ${p.old_price ? `<span class="old-price">${money(p.old_price)}</span>` : ""}</div>
-      ${p.featured ? "<small>★ Featured</small>" : ""}
-      <button class="product-btn" onclick="openProduct('${p.id}')">اطلب الآن</button>
+      <button type="button" class="product-btn">اطلب الآن</button>
     </div></article>`).join("");
+  kxReveal();
 }
 
 /* ---------- création des sections (aucune modif de index.html nécessaire) ---------- */
@@ -580,3 +580,38 @@ async function kxSubmit(){
 }
 
 ensureKriaaPages();
+
+
+/* =====================================================================
+   KRIAA — UI REFINEMENT (apparition au scroll, marquee, navigation par sections)
+   ===================================================================== */
+document.documentElement.classList.add("kx-js");
+
+let kxIO = null;
+function kxReveal(){
+  const els = document.querySelectorAll(".kx-rv:not(.kx-in)");
+  if (!("IntersectionObserver" in window)) { els.forEach(e => e.classList.add("kx-in")); return; }
+  if (!kxIO) kxIO = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add("kx-in"); kxIO.unobserve(e.target); }
+  }), {rootMargin: "0px 0px -6% 0px", threshold: 0.08});
+  els.forEach(e => kxIO.observe(e));
+}
+
+function kxInitMarquee(){
+  const items = ["FAIT AVEC AMOUR", "KRIAA", "DES DÉTAILS DIFFÉRENTS", "COLLECTION 2026"];
+  const set = items.map(t => `<span>${t}</span><i>✦</i>`).join("");
+  const group = `<div class="mq-group">${set.repeat(4)}</div>`;
+  document.querySelectorAll("[data-marquee]").forEach(m => { m.innerHTML = `<div class="mq-track">${group}${group}</div>`; });
+}
+
+function goSection(id){
+  show("shop");
+  setTimeout(() => { const el = $(id); if (el) el.scrollIntoView({behavior: "smooth", block: "start"}); else window.scrollTo({top: 0, behavior: "smooth"}); }, 60);
+}
+function goCollection(c){
+  show("shop"); setCategory(c);
+  setTimeout(() => { const el = $("productsContainer"); if (el) el.scrollIntoView({behavior: "smooth", block: "start"}); }, 80);
+}
+
+kxInitMarquee();
+kxReveal();
