@@ -38,8 +38,8 @@ function openLogin(){$("loginModal")?.classList.add("open");}
 function closeLogin(){$("loginModal")?.classList.remove("open");}
 async function login(){
   const email=$("loginEmail")?.value.trim(),password=$("loginPassword")?.value,msg=$("loginMessage");
-  if(!email||!password){if(msg)msg.textContent="أدخل البريد وكلمة المرور.";return;}
-  if(msg)msg.textContent="جاري تسجيل الدخول...";
+  if(!email||!password){if(msg)msg.textContent="Entrez votre e-mail et votre mot de passe.";return;}
+  if(msg)msg.textContent="Connexion en cours…";
   const {data,error}=await sb.auth.signInWithPassword({email,password});
   if(error){if(msg)msg.textContent=error.message;return;}
   currentUser=data.user;await updateUserInterface();closeLogin();show("home");
@@ -47,39 +47,35 @@ async function login(){
 function openSignup(){
   closeLogin();
   let m=$("signupModal");
-  if(!m){m=document.createElement("div");m.id="signupModal";m.className="modal";m.innerHTML=`<div class="modal-box"><button class="close-modal" onclick="closeSignup()">×</button><span class="eyebrow">KRIAA</span><h2>إنشاء حساب</h2><input id="signupEmail" type="email" placeholder="البريد الإلكتروني"><input id="signupPassword" type="password" placeholder="كلمة المرور"><input id="signupPasswordConfirm" type="password" placeholder="تأكيد كلمة المرور"><button class="primary-btn full" onclick="signup()">إنشاء الحساب</button><p id="signupMessage"></p><button class="secondary-btn full" onclick="backToLogin()">لدي حساب</button></div>`;document.body.appendChild(m);}
+  if(!m){m=document.createElement("div");m.id="signupModal";m.className="modal";m.innerHTML=`<div class="modal-box"><button class="close-modal" onclick="closeSignup()">×</button><span class="eyebrow">KRIAA</span><h2>Créer un compte</h2><input id="signupEmail" type="email" placeholder="E-mail"><input id="signupPassword" type="password" placeholder="Mot de passe"><input id="signupPasswordConfirm" type="password" placeholder="Confirmer le mot de passe"><button class="primary-btn full" onclick="signup()">Créer le compte</button><p id="signupMessage"></p><button class="secondary-btn full" onclick="backToLogin()">J'ai déjà un compte</button></div>`;document.body.appendChild(m);}
   m.classList.add("open");
 }
 function closeSignup(){$("signupModal")?.classList.remove("open");}
 function backToLogin(){closeSignup();openLogin();}
 async function signup(){
   const email=$("signupEmail")?.value.trim(),p=$("signupPassword")?.value,c=$("signupPasswordConfirm")?.value,msg=$("signupMessage");
-  if(!email||!p||!c){msg.textContent="أكمل المعلومات.";return;} if(p.length<6){msg.textContent="كلمة المرور 6 أحرف على الأقل.";return;} if(p!==c){msg.textContent="كلمتا المرور غير متطابقتين.";return;}
-  msg.textContent="جاري إنشاء الحساب...";const {data,error}=await sb.auth.signUp({email,password:p});
+  if(!email||!p||!c){msg.textContent="Complétez les informations.";return;} if(p.length<6){msg.textContent="6 caractères minimum.";return;} if(p!==c){msg.textContent="Les mots de passe ne correspondent pas.";return;}
+  msg.textContent="Création du compte…";const {data,error}=await sb.auth.signUp({email,password:p});
   if(error){msg.textContent=error.message;return;}
-  if(!data.session){msg.textContent="تم إنشاء الحساب. تحقق من البريد الإلكتروني إذا كان تأكيد البريد مفعّلًا.";return;}
-  currentUser=data.user;await updateUserInterface();closeSignup();show("home");toast("تم إنشاء الحساب بنجاح");
+  if(!data.session){msg.textContent="Compte créé. Vérifiez votre e-mail si la confirmation est activée.";return;}
+  currentUser=data.user;await updateUserInterface();closeSignup();show("home");toast("Compte créé avec succès");
 }
 async function logout(){await sb.auth.signOut();currentUser=null;currentUserIsAdmin=false;await updateUserInterface();show("home");}
 
 async function loadProducts(){
   const {data,error}=await sb.from("products").select("*").eq("active",true).order("position",{ascending:true}).order("created_at",{ascending:false});
-  if(error){console.error(error);$("productsContainer").innerHTML="<p>حدث خطأ في تحميل المنتجات.</p>";return;}products=data||[];renderProducts();
-}
-function renderProducts(){
-  const el=$("productsContainer");if(!el)return;const q=($("searchInput")?.value||"").trim().toLowerCase();const list=products.filter(p=>(currentCategory==="all"||p.category===currentCategory)&&(!q||(p.name||"").toLowerCase().includes(q)||(p.description||"").toLowerCase().includes(q)));
-  if(!list.length){el.innerHTML="<p>لا توجد منتجات حاليًا.</p>";return;}
-  el.innerHTML=list.map(p=>`<article class="product-card"><img class="product-image" src="${esc(p.image_url||"https://placehold.co/700x700?text=KRIAA")}" alt="${esc(p.name)}"><div class="product-info">${p.badge?`<span class="badge">${esc(p.badge)}</span>`:""}<h3>${esc(p.name)}</h3><p>${esc(p.description||"")}</p><div class="price">${money(p.price)} ${p.old_price?`<span class="old-price">${money(p.old_price)}</span>`:""}</div>${p.featured?"<small>★ Featured</small>":""}<button class="product-btn" onclick="openOrder('${p.id}')">اطلب الآن</button></div></article>`).join("");
+  if(error){console.error(error);$("productsContainer").innerHTML="<p>Erreur de chargement des produits.</p>";return;}products=data||[];renderProducts();
 }
 
-function populateGovernorates(){const s=$("orderGovernorate");if(!s)return;s.innerHTML='<option value="">اختر الولاية</option>'+Object.keys(GOVS).map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join("");s.onchange=()=>populateCities(s.value);}
-function populateCities(g){const s=$("orderCity");if(!s)return;s.innerHTML='<option value="">اختر المدينة</option>'+(GOVS[g]||[]).map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");}
+/* (ancien formulaire de commande en popup — conservé, non utilisé par les cartes) */
+function populateGovernorates(){const s=$("orderGovernorate");if(!s)return;s.innerHTML='<option value="">Gouvernorat</option>'+Object.keys(GOVS).map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join("");s.onchange=()=>populateCities(s.value);}
+function populateCities(g){const s=$("orderCity");if(!s)return;s.innerHTML='<option value="">Ville</option>'+(GOVS[g]||[]).map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");}
 function openOrder(id){
   selectedProduct=products.find(p=>p.id===id);if(!selectedProduct)return;
-  $("orderTitle").textContent="طلب "+selectedProduct.name;$("orderSummary").textContent=`السعر: ${money(selectedProduct.price)}`;
-  $("orderSize").innerHTML='<option value="">اختر المقاس</option>'+(selectedProduct.sizes||["S","M","L","XL","XXL"]).map(x=>`<option>${esc(x)}</option>`).join("");
-  $("orderColor").innerHTML='<option value="">اختر اللون</option>'+(selectedProduct.colors||[]).map(x=>`<option>${esc(x)}</option>`).join("");
-  $("orderQuantity").max=selectedProduct.stock||1;$("orderQuantity").value=1;$("orderMessage").textContent="";populateGovernorates();$("orderCity").innerHTML='<option value="">اختر المدينة</option>';$('orderModal').classList.add("open");
+  $("orderTitle").textContent="Commande : "+selectedProduct.name;$("orderSummary").textContent=`Prix : ${money(selectedProduct.price)}`;
+  $("orderSize").innerHTML='<option value="">Taille</option>'+(selectedProduct.sizes||["S","M","L","XL","XXL"]).map(x=>`<option>${esc(x)}</option>`).join("");
+  $("orderColor").innerHTML='<option value="">Couleur</option>'+(selectedProduct.colors||[]).map(x=>`<option>${esc(x)}</option>`).join("");
+  $("orderQuantity").max=selectedProduct.stock||1;$("orderQuantity").value=1;$("orderMessage").textContent="";populateGovernorates();$("orderCity").innerHTML='<option value="">Ville</option>';$('orderModal').classList.add("open");
 }
 function closeOrder(){$("orderModal")?.classList.remove("open");}
 async function submitOrder(){
@@ -95,19 +91,17 @@ async function submitOrder(){
   const msg=$("orderMessage");
 
   if(!name||!size||!whatsapp||!gov||!city){
-    msg.textContent="أكمل المعلومات المطلوبة.";
+    msg.textContent="Complétez les informations obligatoires.";
     return;
   }
 
   if(selectedProduct.stock<qty){
-    msg.textContent="الكمية المطلوبة غير متوفرة.";
+    msg.textContent="Quantité demandée non disponible.";
     return;
   }
 
-  msg.textContent="جاري إرسال الطلب...";
+  msg.textContent="Envoi de la commande…";
 
-  // ننشئ UUID للطلب محليًا حتى لا نحتاج SELECT بعد INSERT.
-  // هذا مهم للزائر anon لأن لديه صلاحية INSERT فقط على orders.
   const orderId=(window.crypto&&typeof crypto.randomUUID==="function")
     ? crypto.randomUUID()
     : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{
@@ -116,7 +110,7 @@ async function submitOrder(){
         return v.toString(16);
       });
 
-  const total=Number(selectedProduct.price)*qty;
+  const total=Number(selectedProduct.price)*qty+SHIPPING_FEE;
 
   const {error:orderError}=await sb.from("orders").insert({
     id:orderId,
@@ -130,7 +124,7 @@ async function submitOrder(){
 
   if(orderError){
     console.error("ORDER ERROR:",orderError);
-    msg.textContent="تعذر إرسال الطلب: "+orderError.message;
+    msg.textContent="Impossible d'envoyer la commande : "+orderError.message;
     return;
   }
 
@@ -146,7 +140,7 @@ async function submitOrder(){
 
   if(itemError){
     console.error("ORDER ITEM ERROR:",itemError);
-    msg.textContent="تم إنشاء الطلب لكن حدث خطأ في تفاصيل المنتج.";
+    msg.textContent="La commande est créée mais les détails du produit n'ont pas pu être enregistrés.";
     return;
   }
 
@@ -163,12 +157,13 @@ async function submitOrder(){
     console.warn("Stock was not decremented because quantity was no longer available.");
   }
 
-  msg.textContent="تم إرسال طلبك بنجاح!";
+  msg.textContent="Votre commande a bien été envoyée !";
   setTimeout(closeOrder,1200);
   loadProducts();
 }
 
-async function openAdminDashboard(){if(!currentUser){openLogin();return;}currentUserIsAdmin=await isAdmin();if(!currentUserIsAdmin){toast("ليس لديك صلاحية Admin");show("home");return;}showAdminPage();switchAdminTab(adminTab||"dashboard");}
+/* ======================= ADMIN (inchangé) ======================= */
+async function openAdminDashboard(){if(!currentUser){openLogin();return;}currentUserIsAdmin=await isAdmin();if(!currentUserIsAdmin){toast("Accès refusé");show("home");return;}showAdminPage();switchAdminTab(adminTab||"dashboard");}
 function showAdminPage(){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));$("admin")?.classList.add("active");}
 function switchAdminTab(tab){if(!currentUserIsAdmin){openAdminDashboard();return;}adminTab=tab;document.querySelectorAll(".admin-tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));const titles={dashboard:"Dashboard",products:"CLOTHES / المنتجات",orders:"ORDERS / الطلبات",portfolioAdmin:"PORTFOLIO",settings:"SETTINGS"};$("adminTitle").textContent=titles[tab]||"Dashboard";if(tab==="dashboard")renderDashboard();if(tab==="products")renderProductsAdmin();if(tab==="orders")renderOrdersAdmin();if(tab==="portfolioAdmin")renderPortfolioAdmin();if(tab==="settings")renderSettingsAdmin();}
 
@@ -205,7 +200,7 @@ async function changeOrderStatus(id,status){const {error}=await sb.from("orders"
 async function archiveOrder(id,archived){const {error}=await sb.from("orders").update({archived}).eq("id",id);if(error)toast(error.message);else renderOrdersAdmin();}
 async function deleteOrder(id){if(!confirm("حذف الطلب نهائيًا؟"))return;const {error}=await sb.from("orders").delete().eq("id",id);if(error)toast(error.message);else renderOrdersAdmin();}
 
-async function loadPortfolio(){const {data,error}=await sb.from("portfolio").select("*").eq("active",true).order("position",{ascending:true});const el=$("portfolioContainer");if(!el)return;if(error){el.innerHTML="<p>تعذر تحميل Portfolio.</p>";return;}el.innerHTML=(data||[]).map(p=>`<article class="portfolio-card">${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.title)}">`:''}<div class="p-body"><h3>${esc(p.title)}</h3><p>${esc(p.description)}</p></div></article>`).join("")||'<p>لا توجد أعمال.</p>';}
+async function loadPortfolio(){const {data,error}=await sb.from("portfolio").select("*").eq("active",true).order("position",{ascending:true});const el=$("portfolioContainer");if(!el)return;if(error){el.innerHTML="<p>Impossible de charger le portfolio.</p>";return;}el.innerHTML=(data||[]).map(p=>`<article class="portfolio-card">${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.title)}">`:''}<div class="p-body"><h3>${esc(p.title)}</h3><p>${esc(p.description)}</p></div></article>`).join("")||'<p>Aucune création pour le moment.</p>';}
 async function renderPortfolioAdmin(){const {data,error}=await sb.from("portfolio").select("*").order("position",{ascending:true});const el=$("adminContent");if(error){el.innerHTML=`<div class="admin-box">${esc(error.message)}</div>`;return;}el.innerHTML=`<div class="admin-top-actions"><button class="primary-btn" onclick="openPortfolioEditor()">＋ إضافة صورة</button></div><div class="admin-box">${(data||[]).map(p=>`<div class="product-admin-row"><img src="${esc(p.image_url||'https://placehold.co/100x100?text=KRIAA')}" alt=""><div><b>${esc(p.title)}</b><br><small>${esc(p.description)}</small></div><div class="admin-actions"><button onclick="openPortfolioEditor('${p.id}')">✏️</button><button onclick="togglePortfolio('${p.id}',${!p.active})">${p.active?'👁️':'🙈'}</button><button class="danger" onclick="deletePortfolio('${p.id}')">🗑️</button></div></div>`).join("")||'<div class="empty">لا توجد صور.</div>'}</div>`;}
 async function openPortfolioEditor(id=null){const p=id?(await sb.from("portfolio").select("*").eq("id",id).single()).data:null;const x=p||{title:'',description:'',image_url:'',active:true,position:0};$("editorContent").innerHTML=`<span class="eyebrow">PORTFOLIO</span><h2>${id?'تعديل الصورة':'إضافة صورة'}</h2><div class="admin-form"><input id="pfTitle" value="${esc(x.title)}" placeholder="العنوان"><textarea id="pfDescription" rows="4" placeholder="الوصف">${esc(x.description)}</textarea><input id="pfUrl" value="${esc(x.image_url||'')}" placeholder="رابط الصورة"><input id="pfFile" type="file" accept="image/*"><label class="checkbox-row"><input id="pfActive" type="checkbox" ${x.active!==false?'checked':''}> إظهار</label><button class="primary-btn full" onclick="savePortfolio('${id||''}')">حفظ</button></div>`;$("editorModal").classList.add("open");}
 async function savePortfolio(id){try{const f=$("pfFile").files[0];let url=$("pfUrl").value.trim();if(f)url=await uploadImage(f,'portfolio-images');const payload={title:$("pfTitle").value.trim(),description:$("pfDescription").value.trim(),image_url:url,active:$("pfActive").checked};const r=id?await sb.from("portfolio").update(payload).eq("id",id):await sb.from("portfolio").insert(payload);if(r.error)throw r.error;closeEditor();renderPortfolioAdmin();loadPortfolio();}catch(e){toast("تعذر حفظ الصورة: "+e.message);}}
@@ -214,7 +209,6 @@ async function deletePortfolio(id){if(!confirm("حذف الصورة؟"))return;c
 
 async function renderSettingsAdmin(){const {data,error}=await sb.from("store_settings").select("*").eq("id",1).single();const el=$("adminContent");if(error){el.innerHTML=`<div class="admin-box">${esc(error.message)}</div>`;return;}const s=data||{};el.innerHTML=`<div class="admin-box"><h3>إعدادات المتجر</h3><div class="admin-form"><div class="form-grid"><input id="sName" value="${esc(s.store_name||'KRIAA')}" placeholder="اسم المتجر"><input id="sCurrency" value="${esc(s.currency||'TND')}" placeholder="العملة"><input id="sLogo" class="form-full" value="${esc(s.logo_url||'')}" placeholder="رابط Logo"><input id="sLogoFile" class="form-full" type="file" accept="image/*"><input id="sSizes" class="form-full" value="${esc((s.default_sizes||[]).join(', '))}" placeholder="المقاسات الافتراضية"><input id="sColors" class="form-full" value="${esc((s.default_colors||[]).join(', '))}" placeholder="الألوان الافتراضية"><textarea id="sDelivery" class="form-full" rows="3" placeholder="إعدادات التوصيل">${esc(s.delivery_text||'')}</textarea><textarea id="sOrder" class="form-full" rows="3" placeholder="إعدادات الطلب">${esc(s.order_text||'')}</textarea></div><button class="primary-btn full" onclick="saveSettings()">حفظ الإعدادات</button></div></div><div class="admin-box"><h3>الحساب</h3><p>${esc(currentUser?.email||'')}</p><button class="secondary-btn" onclick="logout()">تسجيل الخروج</button></div>`;}
 async function saveSettings(){try{const f=$("sLogoFile").files[0];let logo=$("sLogo").value.trim();if(f)logo=await uploadImage(f,'store-assets');const payload={store_name:$("sName").value.trim()||'KRIAA',currency:$("sCurrency").value.trim()||'TND',logo_url:logo,default_sizes:$("sSizes").value.split(',').map(x=>x.trim()).filter(Boolean),default_colors:$("sColors").value.split(',').map(x=>x.trim()).filter(Boolean),delivery_text:$("sDelivery").value.trim(),order_text:$("sOrder").value.trim(),updated_at:new Date().toISOString()};const {error}=await sb.from("store_settings").upsert({...payload,id:1});if(error)throw error;toast("تم حفظ الإعدادات");loadSettings();}catch(e){toast("تعذر حفظ الإعدادات: "+e.message);}}
-async function loadSettings(){const {data}=await sb.from("store_settings").select("*").eq("id",1).single();if(data){$("heroStoreName").textContent=data.store_name||"KRIAA";document.title=data.store_name||"KRIAA";}}
 
 sb.auth.onAuthStateChange((_event,session)=>{setTimeout(async()=>{currentUser=session?.user||null;currentUserIsAdmin=await isAdmin();await updateUserInterface();},0);});
 sb.channel("kriaa-orders").on("postgres_changes",{event:"*",schema:"public",table:"orders"},()=>{if(currentUserIsAdmin&&adminTab) {if(adminTab==='dashboard')renderDashboard();if(adminTab==='orders')renderOrdersAdmin();}}).subscribe();
@@ -222,15 +216,13 @@ sb.channel("kriaa-orders").on("postgres_changes",{event:"*",schema:"public",tabl
 (async function start(){try{const {data}=await sb.auth.getUser();currentUser=data?.user||null;currentUserIsAdmin=await isAdmin();}catch(e){console.error(e);}populateGovernorates();await loadSettings();await loadProducts();await loadPortfolio();await updateUserInterface();})();
 
 /* =====================================================================
-   KRIAA — PRODUCT PAGE + DIRECT CHECKOUT  (à coller à la FIN de script.js)
-   - Aucune fonction existante n'est supprimée.
-   - renderProducts() et loadSettings() sont redéfinies (la dernière déclaration gagne).
-   - Même système de commandes : tables orders / order_items + rpc decrement_product_stock.
+   KRIAA — PAGE PRODUIT + COMMANDE DIRECTE
    ===================================================================== */
 
-// Numéro WhatsApp du magasin (format 216XXXXXXXX). Laisser "" pour utiliser store_settings.whatsapp si présent,
-// sinon wa.me s'ouvre sans destinataire et le client choisit le contact.
-const KRIAA_WHATSAPP = "";
+// Frais de livraison ajoutés au total de chaque commande (en DT)
+const SHIPPING_FEE = 8;
+const DELIVERY_TEXT = "Livraison en 48h · 8 DT";
+
 // La table orders n'a pas de colonne "adresse". Si vous en ajoutez une (ex: "address"), mettez son nom ici.
 // Sinon l'adresse est ajoutée à la colonne city sous la forme "Ville — Rue…" (visible dans l'Admin).
 const KRIAA_ADDRESS_COLUMN = null;
@@ -249,15 +241,18 @@ function kxPrice(v){
   const n = Number(v || 0), cur = storeSettings.currency || "TND";
   return `${Number.isInteger(n) ? n : n.toFixed(2)} ${cur === "TND" ? "DT" : cur}`;
 }
+/* Images du produit : 3 maximum, uniquement celles qui existent.
+   Sources : image_url (une ou plusieurs URL séparées par virgule/espace/retour ligne) + colonne "images" si elle existe. */
 function productImages(p){
   let a = [];
-  if (Array.isArray(p.images)) a = p.images;
+  if (p.image_url) a = a.concat(String(p.image_url).split(/[\s,]+/));
+  if (Array.isArray(p.images)) a = a.concat(p.images);
   else if (typeof p.images === "string" && p.images.trim()) {
-    try { a = JSON.parse(p.images); } catch(e){ a = p.images.split(/[\n,]/); }
+    let extra = [];
+    try { extra = JSON.parse(p.images); } catch(e){ extra = p.images.split(/[\s,]+/); }
+    if (Array.isArray(extra)) a = a.concat(extra);
   }
-  a = a.map(x => String(x || "").trim()).filter(Boolean);
-  if (p.image_url) a.unshift(String(p.image_url).trim());
-  a = [...new Set(a)];
+  a = [...new Set(a.map(x => String(x || "").trim()).filter(Boolean))].slice(0, 3);
   return a.length ? a : ["https://placehold.co/900x1100?text=KRIAA"];
 }
 function kxHighlights(p){
@@ -267,7 +262,7 @@ function kxHighlights(p){
   return [];
 }
 
-/* ---------- settings (même table, on garde aussi les valeurs) ---------- */
+/* ---------- settings ---------- */
 async function loadSettings(){
   const {data} = await sb.from("store_settings").select("*").eq("id",1).single();
   if (data) {
@@ -277,25 +272,25 @@ async function loadSettings(){
   }
 }
 
-/* ---------- shop grid : la carte ouvre la page produit ---------- */
+/* ---------- grille boutique : la carte ouvre la page produit ---------- */
 function renderProducts(){
   const el = $("productsContainer"); if (!el) return;
   const q = ($("searchInput")?.value || "").trim().toLowerCase();
   const list = products.filter(p => (currentCategory === "all" || p.category === currentCategory) &&
     (!q || (p.name||"").toLowerCase().includes(q) || (p.description||"").toLowerCase().includes(q)));
-  if (!list.length) { el.innerHTML = "<p>لا توجد منتجات حاليًا.</p>"; return; }
+  if (!list.length) { el.innerHTML = "<p>Aucun produit pour le moment.</p>"; return; }
   el.innerHTML = list.map(p => `<article class="product-card kx-rv" onclick="openProduct('${p.id}')">
-    <div class="pc-media">${p.badge ? `<span class="badge pc-badge">${esc(p.badge)}</span>` : ""}${p.featured ? '<span class="pc-feat">★</span>' : ""}<img class="product-image" loading="lazy" decoding="async" src="${esc(p.image_url || "https://placehold.co/700x700?text=KRIAA")}" alt="${esc(p.name)}"></div>
+    <div class="pc-media">${p.badge ? `<span class="badge pc-badge">${esc(p.badge)}</span>` : ""}${p.featured ? '<span class="pc-feat">★</span>' : ""}<img class="product-image" loading="lazy" decoding="async" src="${esc(productImages(p)[0])}" alt="${esc(p.name)}"></div>
     <div class="product-info">
       <h3>${esc(p.name)}</h3>
       <p>${esc(p.description || "")}</p>
-      <div class="price">${money(p.price)} ${p.old_price ? `<span class="old-price">${money(p.old_price)}</span>` : ""}</div>
-      <button type="button" class="product-btn">اطلب الآن</button>
+      <div class="price">${esc(kxPrice(p.price))} ${p.old_price ? `<span class="old-price">${esc(kxPrice(p.old_price))}</span>` : ""}</div>
+      <button type="button" class="product-btn">COMMANDER</button>
     </div></article>`).join("");
   kxReveal();
 }
 
-/* ---------- création des sections (aucune modif de index.html nécessaire) ---------- */
+/* ---------- création des sections ---------- */
 function ensureKriaaPages(){
   if ($("productPage")) return;
   const f = document.createElement("link");
@@ -329,7 +324,7 @@ function ensureKriaaPages(){
   });
 }
 
-/* ---------- PRODUCT PAGE ---------- */
+/* ---------- PAGE PRODUIT ---------- */
 function openProduct(id){
   const p = products.find(x => x.id === id); if (!p) return;
   selectedProduct = p;
@@ -342,7 +337,7 @@ function openProduct(id){
 
 function renderProductPage(){
   const p = draft.product, imgs = productImages(p), sizes = kxList(p.sizes), colors = kxList(p.colors);
-  const out = Number(p.stock) <= 0, hl = kxHighlights(p), del = (storeSettings.delivery_text || "").trim();
+  const out = Number(p.stock) <= 0, hl = kxHighlights(p);
   kxImgs = imgs;
 
   $("productPage").innerHTML = `<div class="kx-wrap">
@@ -374,25 +369,21 @@ function renderProductPage(){
 
       <p class="kx-msg" id="kxMsg"></p>
       <button type="button" class="kx-cta" ${out ? "disabled" : ""} onclick="kxOrderNow()">${out ? "ÉPUISÉ" : "COMMANDER"}</button>
-      <button type="button" class="kx-wa" onclick="kxWhatsApp()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.5 3.5A11.8 11.8 0 0 0 2.1 17.8L1 23l5.3-1.4A11.8 11.8 0 0 0 12 23.1h0A11.8 11.8 0 0 0 20.5 3.5zM12 21.1a9.8 9.8 0 0 1-5-1.4l-.4-.2-3.1.8.8-3-.2-.4a9.8 9.8 0 1 1 7.9 4.2zm5.4-7.3c-.3-.1-1.7-.8-2-.9s-.5-.1-.7.1-.8.9-.9 1.1-.3.2-.6.1a8 8 0 0 1-4-3.5c-.3-.5.3-.5.8-1.5a.6.6 0 0 0 0-.5l-.9-2.1c-.2-.5-.5-.5-.7-.5h-.6a1.1 1.1 0 0 0-.8.4 3.4 3.4 0 0 0-1 2.5 5.9 5.9 0 0 0 1.2 3.1 13.5 13.5 0 0 0 5.2 4.6c1.9.8 2.6.9 3.5.7a3 3 0 0 0 2-1.4 2.5 2.5 0 0 0 .2-1.4c-.1-.1-.3-.2-.6-.3z"/></svg>
-        COMMANDER SUR WHATSAPP</button>
 
-      ${del ? `<div class="kx-del"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 6h13v10H1zM14 9h4l3 3v4h-7z"/><circle cx="6" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
-        <div><div class="kx-label">LIVRAISON</div><div class="kx-del-t">${esc(del).replace(/\n/g,"<br>")}</div></div></div>` : ""}
+      <div class="kx-del"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 6h13v10H1zM14 9h4l3 3v4h-7z"/><circle cx="6" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+        <div><div class="kx-label">LIVRAISON</div><div class="kx-del-t">${esc(DELIVERY_TEXT)}</div></div></div>
 
       ${hl.length ? `<div class="kx-block"><div class="kx-label">HIGHLIGHTS</div><ul class="kx-hl">${hl.map(h => `<li>${esc(h)}</li>`).join("")}</ul></div>` : ""}
     </div>
   </div></div>`;
 
-  // pré-sélection (couleur unique ou valeur déjà choisie)
   document.querySelectorAll("#productPage .kx-opt").forEach(b => {
     const t = b.closest(".kx-block").querySelector(".kx-label").textContent;
     if ((t === "TAILLE" && draft.size === b.dataset.v) || (t === "COULEUR" && draft.color === b.dataset.v)) b.classList.add("on");
   });
 }
 
-/* gallery */
+/* galerie */
 function kxGalleryScroll(){
   const t = $("kxTrack"); if (!t || !t.clientWidth) return;
   const i = Math.round(t.scrollLeft / t.clientWidth);
@@ -434,18 +425,8 @@ function kxOrderNow(){
   if (err) { $("kxMsg").textContent = err; return; }
   openCheckout();
 }
-function kxWhatsApp(){
-  const err = kxValid();
-  if (err) { $("kxMsg").textContent = err; return; }
-  const p = draft.product, lines = ["Bonjour KRIAA, je souhaite commander :", `Produit : ${p.name}`];
-  if (draft.size) lines.push(`Taille : ${draft.size}`);
-  if (draft.color) lines.push(`Couleur : ${draft.color}`);
-  lines.push(`Quantité : ${draft.qty}`, `Prix : ${kxPrice(p.price)}`);
-  const num = String(KRIAA_WHATSAPP || storeSettings.whatsapp || storeSettings.whatsapp_number || "").replace(/\D/g, "");
-  window.open(`https://wa.me/${num}?text=${encodeURIComponent(lines.join("\n"))}`, "_blank");
-}
 
-/* ---------- CHECKOUT ---------- */
+/* ---------- COMMANDE ---------- */
 function openCheckout(){
   renderCheckout();
   show("checkoutPage");
@@ -454,7 +435,6 @@ function openCheckout(){
 
 function renderCheckout(){
   const p = draft.product, sizes = kxList(p.sizes), colors = kxList(p.colors), img = productImages(p)[0];
-  const max = Math.max(1, Number(p.stock) || 1);
   $("checkoutPage").innerHTML = `<div class="kx-wrap kx-co">
   <button class="kx-back" onclick="show('productPage')">← RETOUR AU PRODUIT</button>
   <div id="kxCoBody">
@@ -495,17 +475,16 @@ function kxCities(g){
 
 function kxCoTotals(){
   const el = $("kxCoTotals"); if (!el) return;
-  const p = draft.product, total = Number(p.price) * draft.qty, del = (storeSettings.delivery_text || "").trim();
+  const p = draft.product, sub = Number(p.price) * draft.qty, total = sub + SHIPPING_FEE;
   const row = (a,b) => `<div class="kx-row"><span>${a}</span><b>${b}</b></div>`;
   el.innerHTML =
     row("Produit", esc(p.name)) +
     (kxList(p.sizes).length ? row("Taille", esc(draft.size || "—")) : "") +
     (kxList(p.colors).length ? row("Couleur", esc(draft.color || "—")) : "") +
     row("Quantité", draft.qty) +
-    row("Prix", esc(kxPrice(p.price))) +
-    (del && del.length <= 40 ? row("Livraison", esc(del)) : "") +
-    `<div class="kx-row kx-total"><span>TOTAL</span><b>${esc(kxPrice(total))}</b></div>` +
-    (del && del.length > 40 ? `<p class="kx-note">${esc(del).replace(/\n/g,"<br>")}</p>` : "");
+    row("Sous-total", esc(kxPrice(sub))) +
+    row("Livraison (48h)", esc(kxPrice(SHIPPING_FEE))) +
+    `<div class="kx-row kx-total"><span>TOTAL</span><b>${esc(kxPrice(total))}</b></div>`;
 }
 
 function kxPhone(v){
@@ -533,7 +512,9 @@ async function kxSubmit(){
   const orderId = (window.crypto && typeof crypto.randomUUID === "function")
     ? crypto.randomUUID()
     : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => { const r = Math.random()*16|0; return (c === "x" ? r : (r&3|8)).toString(16); });
-  const total = Number(p.price) * qty;
+
+  // total = prix des articles + 8 DT de livraison
+  const total = Number(p.price) * qty + SHIPPING_FEE;
 
   const orderRow = {
     id: orderId,
@@ -573,7 +554,7 @@ async function kxSubmit(){
   if (stockOk === false) console.warn("Stock was not decremented because quantity was no longer available.");
 
   $("kxCoBody").innerHTML = `<div class="kx-ok"><div class="kx-ok-i">✓</div><h1 class="kx-title">Merci</h1>
-    <p>Votre commande a bien été envoyée. Nous vous contacterons très bientôt pour la confirmer.</p>
+    <p>Votre commande a bien été envoyée. Nous vous contacterons très bientôt pour la confirmer. Livraison en 48h.</p>
     <button type="button" class="kx-cta" onclick="show('shop')">CONTINUER VOS ACHATS</button></div>`;
   window.scrollTo(0, 0);
   loadProducts();
@@ -583,7 +564,7 @@ ensureKriaaPages();
 
 
 /* =====================================================================
-   KRIAA — UI REFINEMENT (apparition au scroll, marquee, navigation par sections)
+   KRIAA — UI (apparition au scroll, marquee, navigation par sections)
    ===================================================================== */
 document.documentElement.classList.add("kx-js");
 
@@ -598,7 +579,7 @@ function kxReveal(){
 }
 
 function kxInitMarquee(){
-  const items = ["FAIT AVEC AMOUR", "KRIAA", "DES DÉTAILS DIFFÉRENTS", "COLLECTION 2026"];
+  const items = ["QUALITÉ PREMIUM", "KRIAA", "DES DÉTAILS DIFFÉRENTS", "COLLECTION 2026"];
   const set = items.map(t => `<span>${t}</span><i>✦</i>`).join("");
   const group = `<div class="mq-group">${set.repeat(4)}</div>`;
   document.querySelectorAll("[data-marquee]").forEach(m => { m.innerHTML = `<div class="mq-track">${group}${group}</div>`; });
